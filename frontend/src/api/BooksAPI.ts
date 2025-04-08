@@ -5,6 +5,9 @@ interface FetchBooksResponse {
   totalBooks: number;
 }
 
+const API_URL =
+  "https://bookstore-mission13-enkhtuvshin-gafsfjbtgtfjehdc.eastus-01.azurewebsites.net/";
+
 export const fetchBooks = async (
   pageSize: number,
   pageNum: number,
@@ -16,7 +19,7 @@ export const fetchBooks = async (
       .map((cat) => `bookCats=${encodeURIComponent(cat)}`)
       .join("&");
     const response = await fetch(
-      `https://localhost:5000/Book?pageMany=${pageSize}&pageNum=${pageNum}&sortBy=title&sortOrder=${sortOrder}${selectedCat.length ? `&${catParams}` : ""}`,
+      `${API_URL}/Book?pageMany=${pageSize}&pageNum=${pageNum}&sortBy=title&sortOrder=${sortOrder}${selectedCat.length ? `&${catParams}` : ""}`,
     );
     if (!response.ok) {
       throw new Error("Failed to fetch");
