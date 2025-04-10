@@ -4,6 +4,7 @@ import ShoppingCard from "./pages/ShoppingCard";
 import BooksPage from "./pages/BooksPage";
 import CartPage from "./pages/CartPage";
 import { CartProvider } from "./context/CartContext";
+import AdminBooksPage from "./pages/AdminBooksPage";
 function App() {
   return (
     <>
@@ -13,6 +14,7 @@ function App() {
             <Route path="/" element={<BooksPage />} />
             <Route path="/addcart/:title/:bookID" element={<ShoppingCard />} />
             <Route path="/cart" element={<CartPage />} />
+            <Route path="/adminBook" element={<AdminBooksPage />} />
           </Routes>
         </Router>
       </CartProvider>

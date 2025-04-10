@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Book } from "../types/Book";
 import { useNavigate } from "react-router-dom";
 import { fetchBooks } from "../api/BooksAPI";
+import Pagination from "../components/Pagination";
 
 function BookList({ selectedCat }: { selectedCat: string[] }) {
   const [books, setBooks] = useState<Book[]>();
@@ -13,46 +14,41 @@ function BookList({ selectedCat }: { selectedCat: string[] }) {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    const loadBooks = async () => {
-      try {
-        setLoading(true);
-        const data = await fetchBooks(
-          pageSize,
-          pageNum,
-          selectedCat,
-          sortOrder,
-        );
+  const loadBooks = async () => {
+    try {
+      setLoading(true);
+      const data = await fetchBooks(pageSize, pageNum, selectedCat, sortOrder);
+      setBooks(data.books);
+      setTotalPages(Math.ceil(data.totalBooks / pageSize));
+    } catch (error) {
+      setError((error as Error).message);
+    } finally {
+      setLoading(false);
+    }
+  };
 
-        setBooks(data.books);
-        setTotalPages(Math.ceil(data.totalBooks / pageSize));
-      } catch (error) {
-        setError((error as Error).message);
-      } finally {
-        setLoading(false);
-      }
-    };
+  useEffect(() => {
     loadBooks();
   }, [pageSize, pageNum, sortOrder, selectedCat]);
+
   if (loading) return <p>Loading Books...</p>;
   if (error) return <p className="text-red-500">Error</p>;
+
   return (
     <>
       <br />
       {books?.map((b) => (
-        <div id="bookCard" className="card">
+        <div id="bookCard" className="card" key={b.bookID}>
           <h3 className="card-title">{b.title}</h3>
           <div className="card-body">
             <ul className="list-unstyled">
               <li>
-                {" "}
                 <strong>Book Author:</strong> {b.author}
               </li>
               <li>
                 <strong>Publisher:</strong> {b.publisher}
               </li>
               <li>
-                {" "}
                 <strong>ISBN:</strong> {b.isbn}
               </li>
               <li>
@@ -60,14 +56,11 @@ function BookList({ selectedCat }: { selectedCat: string[] }) {
                 {b.classification} / {b.category}
               </li>
               <li>
-                {" "}
                 <strong>Number of Pages: </strong>
                 {b.pageCount}
               </li>
               <li>
-                {" "}
-                <strong>Price: </strong>
-                {b.price}
+                <strong>Price: </strong>${b.price.toFixed(2)}
               </li>
             </ul>
             <button
@@ -78,49 +71,24 @@ function BookList({ selectedCat }: { selectedCat: string[] }) {
                 )
               }
             >
-              {" "}
-              Add to shopping card
+              Add to shopping cart
             </button>
           </div>
         </div>
       ))}
 
-      <button disabled={pageNum === 1} onClick={() => setPageNum(pageNum - 1)}>
-        Previous
-      </button>
+      <Pagination
+        currentPage={pageNum}
+        totalPages={totalPages}
+        pageSize={pageSize}
+        onPageChange={setPageNum}
+        onPageSizeChange={(newSize) => {
+          setPageSize(newSize);
+          setPageNum(1);
+        }}
+      />
 
-      {[...Array(totalPages)].map((_, i) => (
-        <button
-          key={i + 1}
-          onClick={() => setPageNum(i + 1)}
-          disabled={pageNum === i + 1}
-        >
-          {i + 1}
-        </button>
-      ))}
-
-      <button
-        disabled={pageNum === totalPages}
-        onClick={() => setPageNum(pageNum + 1)}
-      >
-        Next
-      </button>
       <br />
-      <label>
-        Result Per Page:
-        <select
-          value={pageSize}
-          onChange={(p) => {
-            setPageSize(Number(p.target.value));
-            setPageNum(1);
-          }}
-        >
-          <option value="5">5</option>
-          <option value="10">10</option>
-          <option value="20">20</option>
-        </select>
-      </label>
-
       <button
         onClick={() =>
           setSortOrder((prev) => (prev === "asc" ? "desc" : "asc"))
