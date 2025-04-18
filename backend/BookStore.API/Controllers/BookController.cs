@@ -15,7 +15,8 @@ namespace BookStore.API.Controllers
         }
 
         [HttpGet]
-        public IActionResult GetBooks(int pageMany = 5, int pageNum = 1, [FromQuery] List<string>? bookCats = null, string sortBy = "title", string sortOrder = "asc")
+        public IActionResult GetBooks(int pageMany = 5, int pageNum = 1, [FromQuery] List<string>? bookCats = null,
+            string sortBy = "title", string sortOrder = "asc")
         {
             var query = _bookContext.Books.AsQueryable();
 
@@ -57,49 +58,45 @@ namespace BookStore.API.Controllers
 
             return Ok(bookCategories);
         }
-        [HttpPost]
+
+        [HttpPost("AddBook")]
         public IActionResult AddBook([FromBody] Book newBook)
         {
             _bookContext.Books.Add(newBook);
             _bookContext.SaveChanges();
-
-            return CreatedAtAction(nameof(GetBooks), new { id = newBook.BookID }, newBook);
+            return Ok(newBook);
         }
-
-        [HttpPut("{BookID:int}")]
-        public IActionResult UpdateBook(int BookID, [FromBody] Book updatedBook)
+     [HttpPut("UpdateBook/{bookID}")]
+        public IActionResult UpdateBook(int bookID, [FromBody] Book updatedBook)
         {
-            var existingBook = _bookContext.Books.Find(BookID);
-
-            if (existingBook == null)
-                return NotFound(new { message = $"Book with ID '{BookID}' not found." });
-
+            var existingBook = _bookContext.Books.Find(bookID);
             existingBook.Title = updatedBook.Title;
+            existingBook.Category = updatedBook.Category;
+            existingBook.Price = updatedBook.Price;
             existingBook.Author = updatedBook.Author;
+            existingBook.Classification = updatedBook.Classification;
             existingBook.Publisher = updatedBook.Publisher;
             existingBook.ISBN = updatedBook.ISBN;
-            existingBook.Classification = updatedBook.Classification;
-            existingBook.Category = updatedBook.Category;
             existingBook.PageCount = updatedBook.PageCount;
-            existingBook.Price = updatedBook.Price;
-
+            _bookContext.Books.Update(existingBook);
             _bookContext.SaveChanges();
-
             return Ok(existingBook);
         }
 
-        [HttpDelete("{BookID:int}")]
-        public IActionResult DeleteBook(int BookID)
+        [HttpDelete("DeleteBook/{bookID}")]
+        public IActionResult DeleteBook(int bookID)
         {
-            var book = _bookContext.Books.Find(BookID);
-
+            var book = _bookContext.Books.Find(bookID);
             if (book == null)
+            {
                 return NotFound(new { message = "Book not found." });
-
+            }
+            
             _bookContext.Books.Remove(book);
             _bookContext.SaveChanges();
-
             return NoContent();
         }
+
     }
+
 }

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import { Book } from "../types/Book";
 import { updateBook } from "../api/BooksAPI";
 
@@ -11,48 +11,93 @@ interface EditBookFormProps {
 const EditBookForm = ({ book, onSuccess, onCancel }: EditBookFormProps) => {
   const [formData, setFormData] = useState<Book>({ ...book });
 
-  const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
-  ) => {
-    const { name, value, type } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: type === "number" ? Number(value) : value,
-    }));
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSumbit = async (e: React.FormEvent) => {
     e.preventDefault();
-    try {
-      await updateBook(formData.bookID, formData);
-      onSuccess();
-    } catch (error) {
-      console.error("Failed to update book:", error);
-      alert("Something went wrong while updating the book.");
-    }
+    await updateBook(formData.bookID, formData);
+    onSuccess();
   };
 
   return (
-    <form onSubmit={handleSubmit} className="mb-4">
-      <h2>Edit Book</h2>
-      {Object.entries(formData).map(([key, value]) => (
-        <label key={key} className="block mb-2">
-          {key.charAt(0).toUpperCase() + key.slice(1)}:
-          <input
-            type={typeof value === "number" ? "number" : "text"}
-            name={key}
-            value={value}
-            onChange={handleChange}
-            required
-            className="border p-1 w-full"
-            disabled={key === "bookID"} // Prevent editing the ID
-          />
-        </label>
-      ))}
-      <button type="submit" className="btn btn-primary mr-2">
-        Update Book
-      </button>
-      <button type="button" className="btn btn-secondary" onClick={onCancel}>
+    <form onSubmit={handleSumbit}>
+      <h2>Add New Book</h2>
+      <label>
+        Book Title:{" "}
+        <input
+          type="text"
+          name="title"
+          value={formData.title}
+          onChange={handleChange}
+        />
+      </label>
+      <label>
+        Book Author:{" "}
+        <input
+          type="text"
+          name="author"
+          value={formData.author}
+          onChange={handleChange}
+        />
+      </label>
+      <label>
+        Publisher:{" "}
+        <input
+          type="text"
+          name="publisher"
+          value={formData.publisher}
+          onChange={handleChange}
+        />
+      </label>
+      <label>
+        ISBN:{" "}
+        <input
+          type="text"
+          name="isbn"
+          value={formData.isbn}
+          onChange={handleChange}
+        />
+      </label>
+      <label>
+        Classification:{" "}
+        <input
+          type="text"
+          name="classification"
+          value={formData.classification}
+          onChange={handleChange}
+        />
+      </label>
+      <label>
+        Category:{" "}
+        <input
+          type="text"
+          name="category"
+          value={formData.category}
+          onChange={handleChange}
+        />
+      </label>
+      <label>
+        Page Count:{" "}
+        <input
+          type="number"
+          name="pageCount"
+          value={formData.pageCount}
+          onChange={handleChange}
+        />
+      </label>
+      <label>
+        Price:{" "}
+        <input
+          type="number"
+          name="price"
+          value={formData.price}
+          onChange={handleChange}
+        />
+      </label>
+      <button type="submit">Update Book</button>
+      <button type="button" onClick={onCancel}>
         Cancel
       </button>
     </form>

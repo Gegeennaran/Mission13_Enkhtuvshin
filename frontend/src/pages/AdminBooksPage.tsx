@@ -1,24 +1,26 @@
 import { useEffect, useState } from "react";
 import { Book } from "../types/Book";
 import { deleteBook, fetchBooks } from "../api/BooksAPI";
+import Pagination from "../components/Pagination";
 import NewBookForm from "../components/NewBookForm";
 import EditBookForm from "../components/EditBookForm";
-import Pagination from "../components/Pagination";
 
 const AdminBooksPage = () => {
   const [books, setBooks] = useState<Book[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
-  const [pageSize, setPageSize] = useState<number>(10);
+  const [pageSize, setPageSize] = useState<number>(5);
   const [pageNum, setPageNum] = useState<number>(1);
   const [totalPages, setTotalPages] = useState<number>(0);
-  const [showForm, setShowForm] = useState(false);
+  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
+  const [showForm, setShowForm] = useState<boolean>(false);
   const [editingBook, setEditingBook] = useState<Book | null>(null);
 
-  const reloadBooks = async () => {
+  // ✅ Reusable function to load books and update all necessary states
+  const loadBooks = async () => {
     try {
       setLoading(true);
-      const data = await fetchBooks(pageSize, pageNum, [], "asc");
+      const data = await fetchBooks(pageSize, pageNum, [], sortOrder);
       setBooks(data.books);
       setTotalPages(Math.ceil(data.totalBooks / pageSize));
     } catch (error) {
@@ -29,20 +31,19 @@ const AdminBooksPage = () => {
   };
 
   useEffect(() => {
-    reloadBooks();
-  }, [pageSize, pageNum]);
+    loadBooks();
+  }, [pageSize, pageNum, sortOrder]);
 
   const handleDelete = async (bookID: number) => {
     const confirmDelete = window.confirm(
       "Are you sure you want to delete this book?",
     );
     if (!confirmDelete) return;
-
     try {
       await deleteBook(bookID);
-      reloadBooks();
+      setBooks(books.filter((b) => b.bookID !== bookID));
     } catch (error) {
-      alert("Failed to delete book. Please try again.");
+      alert("Failer to delete book. Please try again.");
     }
   };
 
@@ -50,9 +51,8 @@ const AdminBooksPage = () => {
   if (error) return <p className="text-red-500">Error: {error}</p>;
 
   return (
-    <>
-      <h1>Admin - Book List</h1>
-
+    <div>
+      <h1>Admin - Books</h1>
       {!showForm && (
         <button
           className="btn btn-success mb-3"
@@ -66,7 +66,7 @@ const AdminBooksPage = () => {
         <NewBookForm
           onSuccess={() => {
             setShowForm(false);
-            reloadBooks();
+            loadBooks(); // ✅ reload list after adding
           }}
           onCancel={() => setShowForm(false)}
         />
@@ -77,7 +77,7 @@ const AdminBooksPage = () => {
           book={editingBook}
           onSuccess={() => {
             setEditingBook(null);
-            reloadBooks();
+            loadBooks(); // ✅ reload list after editing
           }}
           onCancel={() => setEditingBook(null)}
         />
@@ -86,14 +86,13 @@ const AdminBooksPage = () => {
       <table className="table table-bordered table-striped">
         <thead className="table-dark">
           <tr>
-            <th>ID</th>
+            <th>BookId</th>
             <th>Title</th>
             <th>Author</th>
             <th>Publisher</th>
             <th>ISBN</th>
-            <th>Classification</th>
-            <th>Category</th>
-            <th>Pages</th>
+            <th>Classification/Category</th>
+            <th>Page Count</th>
             <th>Price</th>
             <th></th>
           </tr>
@@ -106,17 +105,15 @@ const AdminBooksPage = () => {
               <td>{b.author}</td>
               <td>{b.publisher}</td>
               <td>{b.isbn}</td>
-              <td>{b.classification}</td>
-              <td>{b.category}</td>
+              <td>
+                {b.classification}/{b.category}
+              </td>
               <td>{b.pageCount}</td>
-              <td>${b.price.toFixed(2)}</td>
+              <td>{b.price}</td>
               <td>
                 <button
                   className="btn btn-primary btn-sm w-100 mb-1"
-                  onClick={() => {
-                    setEditingBook(b);
-                    window.scrollTo({ top: 0, behavior: "smooth" });
-                  }}
+                  onClick={() => setEditingBook(b)}
                 >
                   Edit
                 </button>
@@ -139,10 +136,18 @@ const AdminBooksPage = () => {
         onPageChange={setPageNum}
         onPageSizeChange={(newSize) => {
           setPageSize(newSize);
-          setPageNum(1);
+          setPageNum(1); // reset to page 1 when size changes
         }}
       />
-    </>
+      <br />
+      <button
+        onClick={() =>
+          setSortOrder((prev) => (prev === "asc" ? "desc" : "asc"))
+        }
+      >
+        Sort by Title ({sortOrder === "asc" ? "A → Z" : "Z → A"})
+      </button>
+    </div>
   );
 };
 

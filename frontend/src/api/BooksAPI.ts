@@ -5,8 +5,10 @@ interface FetchBooksResponse {
   totalBooks: number;
 }
 
-const API_URL =
-  "https://bookstore-mission13-enkhtuvshin-gafsfjbtgtfjehdc.eastus-01.azurewebsites.net";
+// const API_URL =
+//   "https://bookstore-mission13-enkhtuvshin-gafsfjbtgtfjehdc.eastus-01.azurewebsites.net";
+
+const API_URL = "https://localhost:5000/Book";
 
 export const fetchBooks = async (
   pageSize: number,
@@ -19,7 +21,7 @@ export const fetchBooks = async (
       .map((cat) => `bookCats=${encodeURIComponent(cat)}`)
       .join("&");
 
-    const url = `${API_URL}/Book?pageMany=${pageSize}&pageNum=${pageNum}&sortBy=title&sortOrder=${sortOrder}${
+    const url = `${API_URL}?pageMany=${pageSize}&pageNum=${pageNum}&sortBy=title&sortOrder=${sortOrder}${
       selectedCat.length ? `&${catParams}` : ""
     }`;
 
@@ -36,38 +38,21 @@ export const fetchBooks = async (
   }
 };
 
-export const deleteBook = async (bookID: number): Promise<void> => {
-  try {
-    const response = await fetch(`${API_URL}/deleteBook/${bookID}`, {
-      method: "DELETE",
-    });
-
-    if (!response.ok) {
-      throw new Error("Failed to delete book");
-    }
-  } catch (error) {
-    console.error("Error deleting book:", error);
-    throw error;
-  }
-};
-
 export const addBook = async (newBook: Book): Promise<Book> => {
   try {
-    const response = await fetch(`${API_URL}/Book/addbook`, {
+    const response = await fetch(`${API_URL}/AddBook`, {
       method: "POST",
       headers: {
-        "Content-Type": "application/json",
+        "Content-type": "application/json",
       },
       body: JSON.stringify(newBook),
     });
-
     if (!response.ok) {
       throw new Error("Failed to add book");
     }
-
     return await response.json();
   } catch (error) {
-    console.error("Error adding book:", error);
+    console.error("Error adding book", error);
     throw error;
   }
 };
@@ -77,21 +62,32 @@ export const updateBook = async (
   updatedBook: Book,
 ): Promise<Book> => {
   try {
-    const response = await fetch(`${API_URL}/updatebook/${bookID}`, {
+    const response = await fetch(`${API_URL}/UpdateBook/${bookID}`, {
       method: "PUT",
       headers: {
-        "Content-Type": "application/json",
+        "Content-type": "application/json",
       },
       body: JSON.stringify(updatedBook),
     });
 
-    if (!response.ok) {
-      throw new Error(`Failed to update movie: ${response.statusText}`);
-    }
-
     return await response.json();
   } catch (error) {
-    console.error("Error updating movie", error);
+    console.error("Error updating book", error);
+    throw error;
+  }
+};
+
+export const deleteBook = async (bookID: number): Promise<void> => {
+  try {
+    const response = await fetch(`${API_URL}/DeleteBook/${bookID}`, {
+      method: "DELETE",
+    });
+
+    if (!response.ok) {
+      throw new Error("Failed to delete book");
+    }
+  } catch (error) {
+    console.error("Error deleting book", error);
     throw error;
   }
 };

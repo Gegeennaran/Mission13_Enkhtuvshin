@@ -14,14 +14,13 @@ builder.Services.AddDbContext<BookDbContext>(options =>
 
 // ✅ Define the CORS policy BEFORE builder.Build()
 builder.Services.AddCors(options =>
-{
-    options.AddDefaultPolicy(policy =>
+
+    options.AddPolicy("AllowReactApp",policy =>
     {
         policy.WithOrigins("http://localhost:3000")
             .AllowAnyHeader()
             .AllowAnyMethod();
-    });
-});
+    }));
 
 var app = builder.Build();
 
@@ -32,9 +31,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-// ✅ Middleware configuration
-app.UseCors(); // 🔥 Must be BEFORE UseAuthorization
-
+app.UseCors("AllowReactApp"); 
 app.UseHttpsRedirection();
 app.UseAuthorization();
 app.MapControllers();

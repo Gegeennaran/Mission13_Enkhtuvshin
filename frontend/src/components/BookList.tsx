@@ -29,10 +29,10 @@ function BookList({ selectedCat }: { selectedCat: string[] }) {
 
   useEffect(() => {
     loadBooks();
-  }, [pageSize, pageNum, sortOrder, selectedCat]);
+  }, [pageSize, pageNum, selectedCat, sortOrder]);
 
   if (loading) return <p>Loading Books...</p>;
-  if (error) return <p className="text-red-500">Error</p>;
+  if (error) return <p className="text-red-500">Error: {error}</p>;
 
   return (
     <>
@@ -76,7 +76,6 @@ function BookList({ selectedCat }: { selectedCat: string[] }) {
           </div>
         </div>
       ))}
-
       <Pagination
         currentPage={pageNum}
         totalPages={totalPages}
@@ -87,7 +86,6 @@ function BookList({ selectedCat }: { selectedCat: string[] }) {
           setPageNum(1);
         }}
       />
-
       <br />
       <button
         onClick={() =>
