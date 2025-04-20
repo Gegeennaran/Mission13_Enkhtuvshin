@@ -17,7 +17,7 @@ builder.Services.AddCors(options =>
 
     options.AddPolicy("AllowReactApp",policy =>
     {
-        policy.AllowAnyOrigin()
+        policy.WithOrigins("http://localhost:3000", "https://green-field-06983411e.6.azurestaticapps.net")
             .AllowAnyHeader()
             .AllowAnyMethod();
     }));
